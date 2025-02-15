@@ -13,45 +13,58 @@ page_navbar(
       
       title = "Checklists",
       
-      # Sidebar with a slider input for number of bins
-      layout_sidebar(
+      navset_card_tab(
         
-        sidebar = sidebar(
+        nav_panel(
           
-          varSelectizeInput(inputId = "checklist_date_selector",
-                            label = "Select timespan",
-                            data = NULL,
-                            multiple = FALSE)
+          title = "Line graph",
           
+          # Sidebar with a slider input for number of bins
+          layout_sidebar(
+            
+            sidebar = sidebar(
+              
+              varSelectizeInput(inputId = "checklist_date_selector",
+                                label = "Select timespan",
+                                data = NULL,
+                                multiple = FALSE)
+              
+            ),
+            
+            plotOutput("obs_linechart")
+            
+          )
         ),
         
-        plotOutput("obs_linechart")
-        
+        nav_panel(
+          
+          title = "Heatmap",
+          
+          layout_sidebar(
+            
+            sidebar = sidebar(
+              
+              varSelectizeInput(inputId = "checklist_date_selector_x",
+                                label = "Select X axis",
+                                data = NULL,
+                                multiple = FALSE),
+              
+              varSelectizeInput(inputId = "checklist_date_selector_y",
+                                label = "Select Y axis",
+                                data = NULL,
+                                multiple = FALSE)
+              
+            ),
+            
+            plotOutput("checklist_heatmap")
+          )
+        )
       )
     ),
     
     nav_panel(
       
-      title = "Heatmap",
-      
-      layout_sidebar(
-        
-        sidebar = sidebar(
-          
-          varSelectizeInput(inputId = "checklist_date_selector_x",
-                            label = "Select X axis",
-                            data = NULL,
-                            multiple = FALSE),
-          
-          varSelectizeInput(inputId = "checklist_date_selector_y",
-                            label = "Select Y axis",
-                            data = NULL,
-                            multiple = FALSE)
-          
-        ),
-        
-        plotOutput("checklist_heatmap")
-      )
+      title = "Lifers",
     )
   )
 )
