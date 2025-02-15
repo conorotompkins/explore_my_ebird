@@ -72,7 +72,8 @@ function(input, output, session) {
     var_cols <- heatmap_cols()
     
     updateVarSelectizeInput(inputId = "checklist_date_selector_x",
-                            data = var_cols)
+                            data = var_cols,
+                            selected = "Month")
     
   })
   
@@ -81,7 +82,8 @@ function(input, output, session) {
     var_cols <- heatmap_cols()
     
     updateVarSelectizeInput(inputId = "checklist_date_selector_y",
-                            data = var_cols)
+                            data = var_cols,
+                            selected = "Year")
     
   })
   
