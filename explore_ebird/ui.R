@@ -32,8 +32,26 @@ page_navbar(
     
     nav_panel(
       
-      title = "Lifers" 
+      title = "Heatmap",
       
+      layout_sidebar(
+        
+        sidebar = sidebar(
+          
+          varSelectizeInput(inputId = "checklist_date_selector_x",
+                            label = "Select X axis",
+                            data = NULL,
+                            multiple = FALSE),
+          
+          varSelectizeInput(inputId = "checklist_date_selector_y",
+                            label = "Select Y axis",
+                            data = NULL,
+                            multiple = FALSE)
+          
+        ),
+        
+        plotOutput("checklist_heatmap")
+      )
     )
   )
 )

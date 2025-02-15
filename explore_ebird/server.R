@@ -26,10 +26,12 @@ function(input, output, session) {
   obs_data <- reactive({
     
     my_data |> 
-      distinct(submission_id, obs_date_y, obs_date_ym, obs_date_yw) |> 
+      distinct(submission_id, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w) |> 
       rename(`Year` = obs_date_y,
              `Year-month` = obs_date_ym,
-             `Year-week` = obs_date_yw)
+             `Year-week` = obs_date_yw,
+             Month = obs_date_m,
+             Week = obs_date_w)
     
   })
   
@@ -43,6 +45,8 @@ function(input, output, session) {
     
   })
   
+  #checklists
+  
   output$obs_linechart <- renderPlot({
     
     req(input$checklist_date_selector)
@@ -53,6 +57,47 @@ function(input, output, session) {
       ggplot(aes(!!input$checklist_date_selector, n_cumsum)) +
       geom_line() +
       labs(title = "Checklist count over time")
+    
+  })
+  
+  heatmap_cols <- reactive({
+    
+    obs_data() |> 
+      select(Year, Week, Month)
+    
+  })
+  
+  observeEvent(obs_data(), {
+    
+    var_cols <- heatmap_cols()
+    
+    updateVarSelectizeInput(inputId = "checklist_date_selector_x",
+                            data = var_cols)
+    
+  })
+  
+  observeEvent(obs_data(), {
+    
+    var_cols <- heatmap_cols()
+    
+    updateVarSelectizeInput(inputId = "checklist_date_selector_y",
+                            data = var_cols)
+    
+  })
+  
+  output$checklist_heatmap <- renderPlot({
+    
+    req(input$checklist_date_selector_x != input$checklist_date_selector_y)
+    
+    obs_data() |> 
+      count(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |> 
+      complete(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |> 
+      replace_na(list(n = 0)) |> 
+      ggplot(aes(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y, fill = n)) +
+      geom_tile() +
+      scale_fill_viridis_c() +
+      labs(title = "Checklist heatmap",
+           fill = "Checklists")
     
   })
   
