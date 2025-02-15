@@ -23,7 +23,6 @@ my_data
 
 glimpse(my_data)
 
-
 #count of observations
 
 obs_data <- my_data |> 
@@ -42,11 +41,13 @@ obs_data |>
 
 obs_data |> 
   count(obs_date_y, obs_date_m) |> 
+  complete(obs_date_y, obs_date_m) |> 
+  replace_na(list(n = 0)) |> 
   ggplot(aes(obs_date_m, obs_date_y, fill = n)) +
   geom_tile() +
   scale_fill_viridis_c() +
   scale_x_discrete(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0))
+  scale_y_continuous(expand = c(0, 0), transform = "reverse")
 
 obs_data |> 
   count(obs_date_y, obs_date_w) |> 
