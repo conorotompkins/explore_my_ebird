@@ -72,6 +72,22 @@ function(input, output, session) {
     
   })
   
+  heatmap_date_time_count <- reactive({
+    
+    checklist_data() |> 
+      select(submission_id, common_name, !!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |> 
+      group_by(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |> 
+      summarize(checklist_count = n_distinct(submission_id),
+                species_count = n_distinct(common_name)) |> 
+      ungroup() |> 
+      complete(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |>
+      replace_na(list(checklist_count = 0,
+                      species_count = 0)) |> 
+      rename(`Checklist count` = checklist_count,
+             `Species count` = species_count)
+    
+  })
+  
   heatmap_cols <- reactive({
     
     checklist_data() |> 
@@ -99,6 +115,17 @@ function(input, output, session) {
     
   })
   
+  observeEvent(checklist_data(), {
+    
+    var_cols <- heatmap_date_time_count() |> 
+      select(`Checklist count`, `Species count`)
+    
+    updateVarSelectizeInput(inputId = "checklist_metric_selector",
+                            data = var_cols,
+                            selected = "Checklist count")
+    
+  })
+  
   #trigger modal dialog if axes are the same
   
   observeEvent(c(input$checklist_date_selector_x, input$checklist_date_selector_y), {
@@ -114,30 +141,16 @@ function(input, output, session) {
     
   })
   
-  heatmap_date_time_count <- reactive({
-    
-    checklist_data() |> 
-      select(submission_id, common_name, !!input$checklist_date_selector_x, !!input$checklist_date_selector_y)
-    
-  })
-  
   output$checklist_heatmap <- renderPlot({
     
-    req(input$checklist_date_selector_x != input$checklist_date_selector_y)
+    req(input$checklist_date_selector_x != input$checklist_date_selector_y, input$checklist_metric_selector)
 
     heatmap_date_time_count() |> 
-      group_by(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |> 
-      summarize(checklist_count = n_distinct(submission_id),
-                species_count = n_distinct(common_name)) |> 
-      ungroup() |> 
-      complete(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y) |>
-      replace_na(list(checklist_count = 0,
-                      species_count = 0)) |>
-      ggplot(aes(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y, fill = checklist_count)) +
+      ggplot(aes(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y, fill = !!input$checklist_metric_selector)) +
       geom_tile() +
       scale_fill_viridis_c() +
       labs(title = "Checklist heatmap",
-           fill = "Checklists")
+           fill = input$checklist_metric_selector)
     
   })
   

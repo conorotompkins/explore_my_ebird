@@ -46,6 +46,11 @@ page_navbar(
             
             sidebar = sidebar(
               
+              varSelectizeInput(inputId = "checklist_metric_selector",
+                                label = "Select metric",
+                                data = NULL,
+                                multiple = FALSE),
+              
               varSelectizeInput(inputId = "checklist_date_selector_x",
                                 label = "Select X axis",
                                 data = NULL,
