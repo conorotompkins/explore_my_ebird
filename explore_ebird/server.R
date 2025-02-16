@@ -30,8 +30,9 @@ function(input, output, session) {
   checklist_data <- reactive({
     
     my_data |> 
-      select(submission_id, common_name, duration_min, common_name, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w, obs_date_wday, obs_date_hour) |> 
-      rename(Year = obs_date_y,
+      select(submission_id, common_name, duration_min, common_name, obs_date, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w, obs_date_wday, obs_date_hour) |> 
+      rename(Date = obs_date,
+             Year = obs_date_y,
              `Year-month` = obs_date_ym,
              `Year-week` = obs_date_yw,
              Month = obs_date_m,
@@ -39,7 +40,7 @@ function(input, output, session) {
              Weekday = obs_date_wday,
              Hour = obs_date_hour) |> 
       arrange(submission_id) |> 
-      group_by(submission_id, common_name, Year, `Year-month`, `Year-week`, Month, Week, Weekday, Hour) |> 
+      group_by(submission_id, common_name, Date, Year, `Year-month`, `Year-week`, Month, Week, Weekday, Hour) |> 
       summarize(species_count = n(),
                 duration = sum(duration_min)) |> 
       ungroup()
@@ -49,7 +50,7 @@ function(input, output, session) {
   observeEvent(checklist_data(), {
     
     var_cols <- checklist_data() |> 
-      select(Year, `Year-month`, `Year-week`)
+      select(Year, `Year-month`, `Year-week`, Date)
 
     updateVarSelectizeInput(inputId = "checklist_date_selector",
                             data = var_cols)
