@@ -87,6 +87,21 @@ function(input, output, session) {
     
   })
   
+  #trigger modal dialog if axes are the same
+  
+  observeEvent(c(input$checklist_date_selector_x, input$checklist_date_selector_y), {
+
+    if((input$checklist_date_selector_x == input$checklist_date_selector_y) && isTruthy(input$checklist_date_selector_x) && isTruthy(input$checklist_date_selector_y)) {
+      showModal(modalDialog(
+        title = "Oops!",
+        "Choose different columns for each axis",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    
+  })
+  
   output$checklist_heatmap <- renderPlot({
     
     req(input$checklist_date_selector_x != input$checklist_date_selector_y)

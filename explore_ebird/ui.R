@@ -15,6 +15,8 @@ page_navbar(
       
       navset_card_tab(
         
+        id = "tab_nav_2",
+        
         nav_panel(
           
           title = "Line graph",
