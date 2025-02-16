@@ -18,7 +18,9 @@ my_data <- my_data_raw |>
          obs_date_yw = yearweek(obs_date),
          obs_date_y = year(obs_date),
          obs_date_m = month(obs_date, label = TRUE, abbr = TRUE),
-         obs_date_w = isoweek(obs_date))
+         obs_date_w = isoweek(obs_date),
+         obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
+         obs_date_hour = hour(time))
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -26,12 +28,14 @@ function(input, output, session) {
   obs_data <- reactive({
     
     my_data |> 
-      distinct(submission_id, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w) |> 
+      distinct(submission_id, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w, obs_date_wday, obs_date_hour) |> 
       rename(`Year` = obs_date_y,
              `Year-month` = obs_date_ym,
              `Year-week` = obs_date_yw,
              Month = obs_date_m,
-             Week = obs_date_w)
+             Week = obs_date_w,
+             Weekday = obs_date_wday,
+             Hour = obs_date_hour)
     
   })
   
@@ -63,7 +67,7 @@ function(input, output, session) {
   heatmap_cols <- reactive({
     
     obs_data() |> 
-      select(Year, Week, Month)
+      select(Year, Month, Week, Weekday, Hour)
     
   })
   
