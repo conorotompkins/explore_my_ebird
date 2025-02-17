@@ -8,28 +8,33 @@ options(scipen = 999, digits = 4)
 
 theme_set(theme_bw())
 
-my_data_raw <- here("inputs/MyEBirdData.csv") |> 
-  read_csv() |> 
-  clean_names()
-
-my_data <- my_data_raw |> 
-  rename(obs_date = date,
-         species_count = count) |> 
-  mutate(obs_date_ym = yearmonth(obs_date),
-         obs_date_yw = yearweek(obs_date),
-         obs_date_y = year(obs_date),
-         obs_date_m = month(obs_date, label = TRUE, abbr = TRUE),
-         obs_date_w = isoweek(obs_date),
-         obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
-         obs_date_hour = hour(time)) |> 
-  arrange(submission_id)
-
 # Define server logic required to draw a histogram
 function(input, output, session) {
   
+  user_data <- reactive({
+    
+    req(input$upload)
+    
+    ext <- tools::file_ext(input$upload$name)
+    
+    read_csv(input$upload$datapath) |> 
+      clean_names() |> 
+      rename(obs_date = date,
+             species_count = count) |> 
+      mutate(obs_date_ym = yearmonth(obs_date),
+             obs_date_yw = yearweek(obs_date),
+             obs_date_y = year(obs_date),
+             obs_date_m = month(obs_date, label = TRUE, abbr = TRUE),
+             obs_date_w = isoweek(obs_date),
+             obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
+             obs_date_hour = hour(time)) |> 
+      arrange(submission_id)
+    
+  })
+  
   checklist_data <- reactive({
     
-    my_data |> 
+    user_data() |> 
       select(submission_id, common_name, duration_min, common_name, obs_date, obs_date_y, obs_date_ym, obs_date_yw, obs_date_m, obs_date_w, obs_date_wday, obs_date_hour) |> 
       rename(Date = obs_date,
              Year = obs_date_y,
@@ -51,7 +56,7 @@ function(input, output, session) {
     
     var_cols <- checklist_data() |> 
       select(Year, `Year-month`, `Year-week`, Date)
-
+    
     updateVarSelectizeInput(inputId = "checklist_date_selector",
                             data = var_cols)
     
@@ -130,7 +135,7 @@ function(input, output, session) {
   #trigger modal dialog if axes are the same
   
   observeEvent(c(input$checklist_date_selector_x, input$checklist_date_selector_y), {
-
+    
     if((input$checklist_date_selector_x == input$checklist_date_selector_y) && isTruthy(input$checklist_date_selector_x) && isTruthy(input$checklist_date_selector_y)) {
       showModal(modalDialog(
         title = "Oops!",
@@ -145,7 +150,7 @@ function(input, output, session) {
   output$checklist_heatmap <- renderPlot({
     
     req(input$checklist_date_selector_x != input$checklist_date_selector_y, input$checklist_metric_selector)
-
+    
     heatmap_date_time_count() |> 
       ggplot(aes(!!input$checklist_date_selector_x, !!input$checklist_date_selector_y, fill = !!input$checklist_metric_selector)) +
       geom_tile() +
