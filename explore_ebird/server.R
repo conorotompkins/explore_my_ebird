@@ -202,7 +202,24 @@ function(input, output, session) {
     
   })
   
+  #trigger modal dialog if axes are the same
+  
+  observeEvent(c(input$effort_x_axis, input$effort_y_axis), {
+    
+    if((input$effort_x_axis == input$effort_y_axis) && isTruthy(input$effort_x_axis) && isTruthy(input$effort_y_axis)) {
+      showModal(modalDialog(
+        title = "Oops!",
+        "Choose different columns for each axis",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    
+  })
+  
   output$effort_vs_species_count <- renderPlot({
+    
+    req(input$effort_x_axis != input$effort_y_axis)
     
     species_detection_df() |> 
       filter(flag_travelling == TRUE) |> 
