@@ -6,6 +6,15 @@ page_navbar(
   
   title = "Explore your eBird data",
   
+  nav_item(
+    
+    actionButton(inputId = "trigger_upload_modal",
+                 label = "Upload eBird CSV")
+    
+  ),
+  
+  
+  
   nav_panel(
     
     "Checklists",
@@ -14,11 +23,9 @@ page_navbar(
       
       sidebar = sidebar(
         
-        width = 310,
+        title = "Global filters",
         
-        fileInput(inputId = "upload",
-                  label = "Upload eBird CSV",
-                  accept = ".csv")
+        width = 310
         
       ),
       

@@ -11,6 +11,40 @@ theme_set(theme_bw())
 # Define server logic required to draw a histogram
 function(input, output, session) {
   
+  #trigger modal to upload user data
+  observeEvent(input$trigger_upload_modal, {
+    
+    showModal(
+      
+      modalDialog(
+        
+        title = "Upload eBird data!",
+        
+        renderUI(
+          
+          fileInput(inputId = "upload",
+                    label = "Upload eBird CSV",
+                    accept = ".csv")
+          
+        ),
+        
+        easyClose = TRUE,
+        footer = NULL
+        
+      )
+      
+    )
+    
+  })
+  
+  observeEvent(input$upload, {
+    
+    Sys.sleep(1)
+    
+    removeModal()
+    
+  })
+  
   user_data <- reactive({
     
     req(input$upload)
