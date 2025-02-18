@@ -160,4 +160,76 @@ function(input, output, session) {
     
   })
   
+  #species detection
+  
+  species_detection_df <- reactive({
+    
+    user_data() |> 
+      filter(all_obs_reported == 1) |> 
+      select(submission_id,, protocol, state_province, location, starts_with("obs_date"),
+             number_of_observers, duration_min, distance_traveled_km, common_name) |> 
+      group_by(submission_id, protocol, state_province, location, obs_date_m, obs_date_wday, obs_date_hour,
+               number_of_observers, duration_min, distance_traveled_km) |> 
+      summarize(species_count = n_distinct(common_name)) |> 
+      ungroup() |> 
+      mutate(flag_travelling = !is.na(distance_traveled_km)) |> 
+      replace_na(list(distance_traveled_km = 0)) |> 
+      rename(`Distance traveled` = distance_traveled_km,
+             Duration = duration_min,
+             `Species detected` = species_count)
+    
+  })
+  
+  observeEvent(species_detection_df(), {
+    
+    vars <- species_detection_df() |>
+      select(`Distance traveled`, Duration, `Species detected`)
+    
+    updateVarSelectizeInput(inputId = "effort_axis_x",
+                            data = vars,
+                            selected = "Distance traveled")
+    
+  })
+  
+  observeEvent(species_detection_df(), {
+    
+    vars <- species_detection_df() |>
+      select(`Distance traveled`, Duration, `Species detected`)
+    
+    updateVarSelectizeInput(inputId = "effort_axis_y",
+                            data = vars,
+                            selected = "Duration")
+    
+  })
+  
+  #trigger modal dialog if axes are the same
+  
+  observeEvent(c(input$effort_axis_x, input$effort_axis_y), {
+    
+    if((input$effort_axis_x == input$effort_axis_y) && isTruthy(input$effort_axis_x) && isTruthy(input$effort_axis_y)) {
+      showModal(modalDialog(
+        title = "Oops!",
+        "Choose different columns for each axis",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    
+  })
+  
+  output$effort_vs_species_count <- renderPlot({
+    
+    req(input$effort_axis_x != input$effort_axis_y)
+    
+    species_detection_df() |> 
+      filter(flag_travelling == TRUE) |> 
+      ggplot(aes(!!input$effort_axis_x, !!input$effort_axis_y, size = `Species detected`)) +
+      geom_jitter(alpha = .3) +
+      labs(title = "Checklist effort vs species detected",
+           x = input$effort_axis_x,
+           y = input$effort_axis_y,
+           size = "Species detected")
+    
+  })
+  
 }

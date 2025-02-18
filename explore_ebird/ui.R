@@ -81,5 +81,41 @@ page_navbar(
   nav_panel(
     
     title = "Lifers",
+    
+  ),
+  
+  nav_panel(
+    
+    title = "Species detection",
+    
+    navset_card_tab(
+      
+      nav_panel(
+        
+        "Effort",
+        
+        layout_sidebar(
+          
+          sidebar = sidebar(
+            
+            title = "Select chart variables",
+            
+            varSelectizeInput(inputId = "effort_axis_x",
+                              label = "Select X axis",
+                              data = NULL,
+                              selected = NULL),
+            
+            varSelectizeInput(inputId = "effort_axis_y",
+                              label = "Select Y axis",
+                              data = NULL,
+                              selected = NULL)
+            
+          ),
+          
+          plotOutput("effort_vs_species_count")
+          
+        )
+      )
+    )
   )
 )
