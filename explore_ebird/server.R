@@ -160,4 +160,57 @@ function(input, output, session) {
     
   })
   
+  #species detection
+  
+  species_detection_df <- reactive({
+    
+    user_data() |> 
+      filter(all_obs_reported == 1) |> 
+      select(submission_id,, protocol, state_province, location, starts_with("obs_date"),
+             number_of_observers, duration_min, distance_traveled_km, common_name) |> 
+      group_by(submission_id, protocol, state_province, location, obs_date_m, obs_date_wday, obs_date_hour,
+               number_of_observers, duration_min, distance_traveled_km) |> 
+      summarize(species_count = n_distinct(common_name)) |> 
+      ungroup() |> 
+      mutate(flag_travelling = !is.na(distance_traveled_km)) |> 
+      replace_na(list(distance_traveled_km = 0)) |> 
+      rename(`Distance traveled` = distance_traveled_km,
+             Duration = duration_min)
+    
+  })
+  
+  observeEvent(species_detection_df(), {
+    
+    vars <- species_detection_df() |>
+      select(`Distance traveled`, Duration)
+    
+    updateVarSelectizeInput(inputId = "effort_x_axis",
+                            data = vars)
+    
+  })
+  
+  output$effort_vs_species_count1 <- renderPlot({
+    
+    species_detection_df() |> 
+      filter(flag_travelling == TRUE) |> 
+      ggplot(aes(`Distance traveled`, Duration, size = species_count)) +
+      geom_jitter(alpha = .3) +
+      labs(title = "Checklist effort vs species detected",
+           x = "Distance travelled (km)",
+           y = "Duration (minutes)")
+    
+  })
+  
+  output$effort_vs_species_count2 <- renderPlot({
+    
+    species_detection_df() |> 
+      filter(flag_travelling == TRUE) |> 
+      ggplot(aes(!!input$effort_x_axis, species_count)) +
+      geom_jitter(alpha = .3) +
+      labs(title = "Effort type vs species detected",
+           x = input$effort_x_axis,
+           y = "Species detected")
+    
+  })
+  
 }
