@@ -175,41 +175,43 @@ function(input, output, session) {
       mutate(flag_travelling = !is.na(distance_traveled_km)) |> 
       replace_na(list(distance_traveled_km = 0)) |> 
       rename(`Distance traveled` = distance_traveled_km,
-             Duration = duration_min)
+             Duration = duration_min,
+             `Species detected` = species_count)
     
   })
   
   observeEvent(species_detection_df(), {
     
     vars <- species_detection_df() |>
-      select(`Distance traveled`, Duration)
+      select(`Distance traveled`, Duration, `Species detected`)
     
     updateVarSelectizeInput(inputId = "effort_x_axis",
-                            data = vars)
+                            data = vars,
+                            selected = "Distance traveled")
     
   })
   
-  output$effort_vs_species_count1 <- renderPlot({
+  observeEvent(species_detection_df(), {
+    
+    vars <- species_detection_df() |>
+      select(`Distance traveled`, Duration, `Species detected`)
+    
+    updateVarSelectizeInput(inputId = "effort_y_axis",
+                            data = vars,
+                            selected = "Duration")
+    
+  })
+  
+  output$effort_vs_species_count <- renderPlot({
     
     species_detection_df() |> 
       filter(flag_travelling == TRUE) |> 
-      ggplot(aes(`Distance traveled`, Duration, size = species_count)) +
+      ggplot(aes(!!input$effort_x_axis, !!input$effort_y_axis, size = `Species detected`)) +
       geom_jitter(alpha = .3) +
       labs(title = "Checklist effort vs species detected",
-           x = "Distance travelled (km)",
-           y = "Duration (minutes)")
-    
-  })
-  
-  output$effort_vs_species_count2 <- renderPlot({
-    
-    species_detection_df() |> 
-      filter(flag_travelling == TRUE) |> 
-      ggplot(aes(!!input$effort_x_axis, species_count)) +
-      geom_jitter(alpha = .3) +
-      labs(title = "Effort type vs species detected",
            x = input$effort_x_axis,
-           y = "Species detected")
+           y = input$effort_y_axis,
+           size = "Species detected")
     
   })
   

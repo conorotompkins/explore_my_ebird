@@ -94,31 +94,27 @@ page_navbar(
         
         "Effort",
         
-        nav_panel("Effort",
-                  
-                  plotOutput("effort_vs_species_count1")
-                  
+        layout_sidebar(
+          
+          sidebar = sidebar(
+            
+            title = "Select chart variables",
+            
+            varSelectizeInput(inputId = "effort_x_axis",
+                              label = "Select X axis",
+                              data = NULL,
+                              selected = NULL),
+            
+            varSelectizeInput(inputId = "effort_y_axis",
+                              label = "Select Y axis",
+                              data = NULL,
+                              selected = NULL)
+            
+          ),
+          
+          plotOutput("effort_vs_species_count")
+          
         )
-      ),
-      
-      nav_panel("graph 2",
-                
-                layout_sidebar(
-                  
-                  sidebar = sidebar(
-                    
-                    title = "Sidebar title",
-                    
-                    varSelectizeInput(inputId = "effort_x_axis",
-                                      label = "Select X axis variable",
-                                      data = NULL,
-                                      selected = NULL)
-                    
-                  ),
-                  
-                  plotOutput("effort_vs_species_count2")
-                  
-                )
       )
     )
   )
