@@ -185,7 +185,7 @@ function(input, output, session) {
     vars <- species_detection_df() |>
       select(`Distance traveled`, Duration, `Species detected`)
     
-    updateVarSelectizeInput(inputId = "effort_x_axis",
+    updateVarSelectizeInput(inputId = "effort_axis_x",
                             data = vars,
                             selected = "Distance traveled")
     
@@ -196,7 +196,7 @@ function(input, output, session) {
     vars <- species_detection_df() |>
       select(`Distance traveled`, Duration, `Species detected`)
     
-    updateVarSelectizeInput(inputId = "effort_y_axis",
+    updateVarSelectizeInput(inputId = "effort_axis_y",
                             data = vars,
                             selected = "Duration")
     
@@ -204,9 +204,9 @@ function(input, output, session) {
   
   #trigger modal dialog if axes are the same
   
-  observeEvent(c(input$effort_x_axis, input$effort_y_axis), {
+  observeEvent(c(input$effort_axis_x, input$effort_axis_y), {
     
-    if((input$effort_x_axis == input$effort_y_axis) && isTruthy(input$effort_x_axis) && isTruthy(input$effort_y_axis)) {
+    if((input$effort_axis_x == input$effort_axis_y) && isTruthy(input$effort_axis_x) && isTruthy(input$effort_axis_y)) {
       showModal(modalDialog(
         title = "Oops!",
         "Choose different columns for each axis",
@@ -219,15 +219,15 @@ function(input, output, session) {
   
   output$effort_vs_species_count <- renderPlot({
     
-    req(input$effort_x_axis != input$effort_y_axis)
+    req(input$effort_axis_x != input$effort_axis_y)
     
     species_detection_df() |> 
       filter(flag_travelling == TRUE) |> 
-      ggplot(aes(!!input$effort_x_axis, !!input$effort_y_axis, size = `Species detected`)) +
+      ggplot(aes(!!input$effort_axis_x, !!input$effort_axis_y, size = `Species detected`)) +
       geom_jitter(alpha = .3) +
       labs(title = "Checklist effort vs species detected",
-           x = input$effort_x_axis,
-           y = input$effort_y_axis,
+           x = input$effort_axis_x,
+           y = input$effort_axis_y,
            size = "Species detected")
     
   })

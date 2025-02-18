@@ -100,12 +100,12 @@ page_navbar(
             
             title = "Select chart variables",
             
-            varSelectizeInput(inputId = "effort_x_axis",
+            varSelectizeInput(inputId = "effort_axis_x",
                               label = "Select X axis",
                               data = NULL,
                               selected = NULL),
             
-            varSelectizeInput(inputId = "effort_y_axis",
+            varSelectizeInput(inputId = "effort_axis_y",
                               label = "Select Y axis",
                               data = NULL,
                               selected = NULL)
