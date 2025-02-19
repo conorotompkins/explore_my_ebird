@@ -3,12 +3,14 @@ library(janitor)
 library(usethis)
 library(tsibble)
 library(broom)
+library(here)
 
 options(scipen = 999, digits = 4)
 
 theme_set(theme_bw())
 
-my_data_raw <- read_csv("inputs/MyEBirdData.csv") |> 
+my_data_raw <- here("inputs/MyEBirdData.csv") |> 
+  read_csv() |> 
   clean_names()
 
 glimpse(my_data_raw)
@@ -172,12 +174,12 @@ data_test_res |>
   ggplot(aes(species_count, .pred)) +
   geom_abline() +
   geom_jitter(alpha = .3) +
-  geom_smooth(method = "lm") +
+  #geom_smooth(method = "lm") +
   tune::coord_obs_pred()
 
 data_test_res |> 
   select(where(is.numeric)) |> 
-  select(-starts_with("obs_date"), -species_count) |> 
+  select(-starts_with("obs_date"), -c(species_count, .pred)) |> 
   pivot_longer(-.resid) |> 
   ggplot(aes(value, .resid)) +
   geom_jitter(alpha = .5) +
