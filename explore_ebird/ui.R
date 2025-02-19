@@ -1,6 +1,9 @@
 library(shiny)
 library(bslib)
 
+date_df <- tribble(~Year, ~`Year-month`, ~`Year-week`, ~Date,
+                   NA, NA, NA, NA)
+
 # Define UI
 page_navbar(
   
@@ -10,7 +13,12 @@ page_navbar(
     
     title = "Global filters",
     
-    width = 310
+    width = 310,
+    
+    sliderInput(inputId = "year_slider",
+                label = "Choose time period",
+                min = 2019, max = year(Sys.Date()), value = c(2019, year(Sys.Date())),
+                step = 1, sep = "")
     
   ),
   
@@ -38,7 +46,8 @@ page_navbar(
             
             varSelectizeInput(inputId = "checklist_date_selector",
                               label = "Select timespan",
-                              data = NULL,
+                              data = date_df,
+                              selected = "Date",
                               multiple = FALSE)
             
           ),

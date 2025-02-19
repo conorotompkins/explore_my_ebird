@@ -45,12 +45,15 @@ function(input, output, session) {
     
   })
   
-  user_data <- reactive({
+  #observeEvent()
+  
+  user_data_raw <- reactive({
     
     req(input$upload)
     
     ext <- tools::file_ext(input$upload$name)
     
+    #read in and clean up
     read_csv(input$upload$datapath) |> 
       clean_names() |> 
       rename(obs_date = date,
@@ -63,6 +66,14 @@ function(input, output, session) {
              obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
              obs_date_hour = hour(time)) |> 
       arrange(submission_id)
+    
+  })
+  
+  user_data <- reactive({
+    
+    #apply global filters
+    user_data_raw() |> 
+      filter(between(obs_date_y, input$year_slider[1], input$year_slider[2]))
     
   })
   
@@ -83,16 +94,6 @@ function(input, output, session) {
       summarize(species_count = n(),
                 duration = sum(duration_min)) |> 
       ungroup()
-    
-  })
-  
-  observeEvent(checklist_data(), {
-    
-    var_cols <- checklist_data() |> 
-      select(Year, `Year-month`, `Year-week`, Date)
-    
-    updateVarSelectizeInput(inputId = "checklist_date_selector",
-                            data = var_cols)
     
   })
   
