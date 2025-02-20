@@ -30,6 +30,11 @@ my_data <- my_data_raw |>
 
 glimpse(my_data)
 
+#complete checklist
+my_data |> 
+  distinct(submission_id, all_obs_reported) |> 
+  count(all_obs_reported)
+
 #count of observations
 
 obs_data <- my_data |> 
