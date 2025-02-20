@@ -1,5 +1,6 @@
 library(shiny)
 library(bslib)
+library(tidyverse)
 
 date_df <- tribble(~Year, ~`Year-month`, ~`Year-week`, ~Date,
                    NA, NA, NA, NA)
@@ -14,6 +15,11 @@ page_navbar(
     title = "Global filters",
     
     width = 310,
+    
+    radioButtons(inputId = "complete_checklist_filter",
+                 label = "Only include complete checklists",
+                 choices = c("Yes", "No"),
+                 selected = "Yes"),
     
     sliderInput(inputId = "year_slider",
                 label = "Choose time period",
@@ -91,7 +97,7 @@ page_navbar(
   
   nav_panel(
     
-    title = "Lifers",
+    title = "Lifers"
     
   ),
   

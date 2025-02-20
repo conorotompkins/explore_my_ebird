@@ -72,8 +72,18 @@ function(input, output, session) {
   user_data <- reactive({
     
     #apply global filters
-    user_data_raw() |> 
+    
+    #complete checklists only
+    complete_filter <- if(input$complete_checklist_filter == "Yes") 1 else c(0, 1)
+
+    x <- user_data_raw() |> 
+      filter(all_obs_reported %in% complete_filter)
+    
+    #year slider
+    x <- x |> 
       filter(between(obs_date_y, input$year_slider[1], input$year_slider[2]))
+
+    x
     
   })
   
@@ -99,16 +109,33 @@ function(input, output, session) {
   
   #checklists
   
-  output$obs_linechart <- renderPlot({
-    
-    req(input$checklist_date_selector)
+  checklist_graph_data <- reactive({
     
     checklist_data() |> 
       distinct(submission_id, !!input$checklist_date_selector) |> 
       count(!!input$checklist_date_selector) |> 
-      mutate(n_cumsum = cumsum(n)) |> 
+      mutate(n_cumsum = cumsum(n))
+    
+  })
+  
+  output$obs_linechart <- renderPlot({
+    
+    req(input$checklist_date_selector)
+    
+    checklist_rows <- nrow(checklist_graph_data())
+
+    last_checklist <- checklist_graph_data() |> slice(checklist_rows)
+    
+    total_checklists <- last_checklist |> pull(n_cumsum)
+
+    checklist_graph_data() |> 
       ggplot(aes(!!input$checklist_date_selector, n_cumsum)) +
       geom_line() +
+      geom_point(data = last_checklist, 
+                 aes(x = !!input$checklist_date_selector, y = total_checklists)) +
+      geom_label(data = last_checklist, 
+                 aes(x = !!input$checklist_date_selector, y = total_checklists, label = total_checklists),
+                 nudge_x = 75) +
       labs(title = "Checklist count over time")
     
   })
@@ -200,7 +227,6 @@ function(input, output, session) {
   species_detection_df <- reactive({
     
     user_data() |> 
-      filter(all_obs_reported == 1) |> 
       select(submission_id,, protocol, state_province, location, starts_with("obs_date"),
              number_of_observers, duration_min, distance_traveled_km, common_name) |> 
       group_by(submission_id, protocol, state_province, location, obs_date_m, obs_date_wday, obs_date_hour,
