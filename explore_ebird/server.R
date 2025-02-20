@@ -45,8 +45,6 @@ function(input, output, session) {
     
   })
   
-  #observeEvent()
-  
   user_data_raw <- reactive({
     
     req(input$upload)
@@ -75,14 +73,14 @@ function(input, output, session) {
     
     #complete checklists only
     complete_filter <- if(input$complete_checklist_filter == "Yes") 1 else c(0, 1)
-
+    
     x <- user_data_raw() |> 
       filter(all_obs_reported %in% complete_filter)
     
     #year slider
     x <- x |> 
       filter(between(obs_date_y, input$year_slider[1], input$year_slider[2]))
-
+    
     x
     
   })
@@ -123,11 +121,11 @@ function(input, output, session) {
     req(input$checklist_date_selector)
     
     checklist_rows <- nrow(checklist_graph_data())
-
+    
     last_checklist <- checklist_graph_data() |> slice(checklist_rows)
     
     total_checklists <- last_checklist |> pull(n_cumsum)
-
+    
     checklist_graph_data() |> 
       ggplot(aes(!!input$checklist_date_selector, n_cumsum)) +
       geom_line() +
@@ -160,26 +158,6 @@ function(input, output, session) {
     
     checklist_data() |> 
       select(Year, Month, Week, Weekday, Hour)
-    
-  })
-  
-  observeEvent(checklist_data(), {
-    
-    var_cols <- heatmap_cols()
-    
-    updateVarSelectizeInput(inputId = "checklist_date_selector_x",
-                            data = var_cols,
-                            selected = "Month")
-    
-  })
-  
-  observeEvent(checklist_data(), {
-    
-    var_cols <- heatmap_cols()
-    
-    updateVarSelectizeInput(inputId = "checklist_date_selector_y",
-                            data = var_cols,
-                            selected = "Year")
     
   })
   
@@ -238,28 +216,6 @@ function(input, output, session) {
       rename(`Distance traveled` = distance_traveled_km,
              Duration = duration_min,
              `Species detected` = species_count)
-    
-  })
-  
-  observeEvent(species_detection_df(), {
-    
-    vars <- species_detection_df() |>
-      select(`Distance traveled`, Duration, `Species detected`)
-    
-    updateVarSelectizeInput(inputId = "effort_axis_x",
-                            data = vars,
-                            selected = "Distance traveled")
-    
-  })
-  
-  observeEvent(species_detection_df(), {
-    
-    vars <- species_detection_df() |>
-      select(`Distance traveled`, Duration, `Species detected`)
-    
-    updateVarSelectizeInput(inputId = "effort_axis_y",
-                            data = vars,
-                            selected = "Duration")
     
   })
   

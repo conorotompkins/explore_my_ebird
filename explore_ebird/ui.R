@@ -5,6 +5,15 @@ library(tidyverse)
 date_df <- tribble(~Year, ~`Year-month`, ~`Year-week`, ~Date,
                    NA, NA, NA, NA)
 
+heatmap_axis_var_df <- tribble(~Year, ~Month, ~Week, ~Weekday, ~Hour,
+                               NA, NA, NA, NA, NA)
+
+heatmap_metric_var_df <- tribble(~`Checklist count`, ~`Species count`,
+                                 NA, NA)
+
+species_detection_axis_vars_df <- tribble(~`Distance traveled`, ~Duration,
+                                          NA, NA)
+
 # Define UI
 page_navbar(
   
@@ -73,17 +82,19 @@ page_navbar(
             
             varSelectizeInput(inputId = "checklist_metric_selector",
                               label = "Select metric",
-                              data = NULL,
+                              data = heatmap_metric_var_df,
                               multiple = FALSE),
             
             varSelectizeInput(inputId = "checklist_date_selector_x",
                               label = "Select X axis",
-                              data = NULL,
+                              data = heatmap_axis_var_df,
+                              selected = "Month",
                               multiple = FALSE),
             
             varSelectizeInput(inputId = "checklist_date_selector_y",
                               label = "Select Y axis",
-                              data = NULL,
+                              data = heatmap_axis_var_df,
+                              selected = "Year",
                               multiple = FALSE)
             
           ),
@@ -119,13 +130,13 @@ page_navbar(
             
             varSelectizeInput(inputId = "effort_axis_x",
                               label = "Select X axis",
-                              data = NULL,
-                              selected = NULL),
+                              data = species_detection_axis_vars_df,
+                              selected = "Distance traveled"),
             
             varSelectizeInput(inputId = "effort_axis_y",
                               label = "Select Y axis",
-                              data = NULL,
-                              selected = NULL)
+                              data = species_detection_axis_vars_df,
+                              selected = "Duration")
             
           ),
           
