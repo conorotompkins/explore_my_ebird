@@ -108,7 +108,9 @@ page_navbar(
   
   nav_panel(
     
-    title = "Lifers"
+    title = "Lifers",
+    
+    plotOutput("lifer_linechart")
     
   ),
   

@@ -200,6 +200,45 @@ function(input, output, session) {
     
   })
   
+  #lifers
+  
+  lifer_df <- reactive({
+    
+    user_data() |> 
+      filter(!str_detect(common_name, "sp.")) |> 
+      mutate(common_name = str_remove(common_name, "\\([^()]+\\)")) |> 
+      mutate(common_name = str_squish(common_name)) |> 
+      select(obs_date, common_name) |> 
+      distinct() |> 
+      arrange(obs_date) |> 
+      group_by(common_name) |> 
+      mutate(common_name_cumsum = dense_rank(obs_date)) |> 
+      mutate(is_lifer = common_name_cumsum == 1) |> 
+      filter(is_lifer == TRUE) |> 
+      ungroup() |> 
+      mutate(lifer_cumsum = row_number())
+    
+  })
+  
+  output$lifer_linechart <- renderPlot({
+    
+    lifer_rows <- nrow(lifer_df())
+    
+    last_lifer <- lifer_df() |> slice(lifer_rows)
+    
+    total_lifers <- last_lifer |> pull(lifer_cumsum)
+    
+    lifer_df() |> 
+      ggplot(aes(obs_date, lifer_cumsum)) +
+      geom_line() +
+      geom_point(data = last_lifer,
+                 size = 2) +
+      geom_label(data = last_lifer,
+                 aes(label = total_lifers),
+                 nudge_x = 70)
+    
+  })
+  
   #species detection
   
   species_detection_df <- reactive({
