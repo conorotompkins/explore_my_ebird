@@ -91,6 +91,18 @@ lifer_df |>
   ggplot(aes(obs_date, lifer_cumsum, color = state_province, group = state_province)) +
   geom_line()
 
+
+lifer_df |> 
+  select(obs_date, common_name) |> 
+  distinct() |> 
+  arrange(common_name, obs_date) |> 
+  group_by(common_name) |> 
+  mutate(common_name_cumsum = dense_rank(obs_date)) |> 
+  mutate(is_lifer = common_name_cumsum == 1) |> 
+  filter(is_lifer == TRUE) |> 
+  ungroup() |> 
+  mutate(lifer_cumsum = row_number())
+
 #species detection
 species_detection <- my_data |> 
   filter(all_obs_reported == 1) |> 
