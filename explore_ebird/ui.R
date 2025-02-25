@@ -111,24 +111,32 @@ page_navbar(
     
     title = "Lifers",
     
-    navset_card_tab(
+    layout_sidebar(
       
-      nav_panel(
+      sidebar = sidebar(
         
-        title = "Line chart",
-        
-        plotOutput("lifer_linechart")
+        title = "Placeholder sidebar"
         
       ),
       
-      nav_panel(
+      navset_card_tab(
         
-        "Table",
+        nav_panel(
+          
+          title = "Line chart",
+          
+          plotOutput("lifer_linechart")
+          
+        ),
         
-        reactableOutput("lifer_table")
-        
+        nav_panel(
+          
+          "Table",
+          
+          reactableOutput("lifer_table")
+          
+        )
       )
-      
     )
   ),
   
