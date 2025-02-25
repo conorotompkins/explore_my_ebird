@@ -246,8 +246,10 @@ function(input, output, session) {
       select(obs_date, common_name, lifer_cumsum) |> 
       reactable(columns = list(
         
-        obs_date = colDef(name = "Observation Date"),
-        common_name = colDef(name = "Species (Common name)"),
+        obs_date = colDef(name = "Observation Date",
+                          filterable = TRUE),
+        common_name = colDef(name = "Species (Common name)",
+                             filterable = TRUE),
         lifer_cumsum = colDef(name = "Lifer #")
         
       ))
