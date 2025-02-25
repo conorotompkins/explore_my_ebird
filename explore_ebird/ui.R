@@ -1,6 +1,7 @@
 library(shiny)
 library(bslib)
 library(tidyverse)
+library(reactable)
 
 date_df <- tribble(~Year, ~`Year-month`, ~`Year-week`, ~Date,
                    NA, NA, NA, NA)
@@ -110,8 +111,25 @@ page_navbar(
     
     title = "Lifers",
     
-    plotOutput("lifer_linechart")
-    
+    navset_card_tab(
+      
+      nav_panel(
+        
+        title = "Line chart",
+        
+        plotOutput("lifer_linechart")
+        
+      ),
+      
+      nav_panel(
+        
+        "Table",
+        
+        reactableOutput("lifer_table")
+        
+      )
+      
+    )
   ),
   
   nav_panel(

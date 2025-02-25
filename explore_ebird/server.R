@@ -3,6 +3,7 @@ library(tidyverse)
 library(tsibble)
 library(janitor)
 library(here)
+library(reactable)
 
 options(scipen = 999, digits = 4)
 
@@ -236,6 +237,20 @@ function(input, output, session) {
       geom_label(data = last_lifer,
                  aes(label = total_lifers),
                  nudge_x = 70)
+    
+  })
+  
+  output$lifer_table <- renderReactable({
+    
+    lifer_df() |> 
+      select(obs_date, common_name, lifer_cumsum) |> 
+      reactable(columns = list(
+        
+        obs_date = colDef(name = "Observation Date"),
+        common_name = colDef(name = "Species (Common name)"),
+        lifer_cumsum = colDef(name = "Lifer #")
+        
+      ))
     
   })
   
