@@ -9,6 +9,8 @@ options(scipen = 999, digits = 4)
 
 theme_set(theme_bw())
 
+species_exclude_df <- tibble(common_name = c("Muscovy Duck"))
+
 # Define server logic required to draw a histogram
 function(input, output, session) {
   
@@ -206,7 +208,9 @@ function(input, output, session) {
   lifer_df <- reactive({
     
     user_data() |> 
+      anti_join(species_exclude_df, by = join_by(common_name)) |> #not working
       filter(!str_detect(common_name, "sp.")) |> 
+      filter(!str_detect(common_name, "\\/")) |> 
       mutate(common_name = str_remove(common_name, "\\([^()]+\\)")) |> 
       mutate(common_name = str_squish(common_name)) |> 
       select(obs_date, common_name) |> 
