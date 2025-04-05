@@ -7,7 +7,7 @@ library(reactable)
 
 options(scipen = 999, digits = 4)
 
-theme_set(theme_bw())
+theme_set(theme_bw(base_size = 18))
 
 species_exclude_df <- tibble(common_name = c("Muscovy Duck"))
 
@@ -235,12 +235,16 @@ function(input, output, session) {
     
     lifer_df() |> 
       ggplot(aes(obs_date, lifer_cumsum)) +
-      geom_line() +
+      geom_line(lwd = 1.5) +
       geom_point(data = last_lifer,
-                 size = 2) +
+                 size = 4) +
       geom_label(data = last_lifer,
                  aes(label = total_lifers),
-                 nudge_x = 70)
+                 size = 8,
+                 nudge_x = 120) +
+      labs(title = "Lifer species over time",
+  x = "Observation date",
+y = "Lifer #")
     
   })
   
@@ -248,6 +252,7 @@ function(input, output, session) {
     
     lifer_df() |> 
       select(obs_date, common_name, lifer_cumsum) |> 
+      arrange(desc(lifer_cumsum)) |> 
       reactable(columns = list(
         
         obs_date = colDef(name = "Observation Date",
