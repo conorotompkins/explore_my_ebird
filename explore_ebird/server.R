@@ -3,10 +3,13 @@ library(tidyverse)
 library(tsibble)
 library(janitor)
 library(here)
+library(reactable)
 
 options(scipen = 999, digits = 4)
 
-theme_set(theme_bw())
+theme_set(theme_bw(base_size = 18))
+
+species_exclude_df <- tibble(common_name = c("Muscovy Duck"))
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -197,6 +200,68 @@ function(input, output, session) {
       scale_fill_viridis_c() +
       labs(title = "Checklist heatmap",
            fill = input$checklist_metric_selector)
+    
+  })
+  
+  #lifers
+  
+  lifer_df <- reactive({
+    
+    user_data() |> 
+      anti_join(species_exclude_df, by = join_by(common_name)) |> #not working
+      filter(!str_detect(common_name, "sp.")) |> 
+      filter(!str_detect(common_name, "\\/")) |> 
+      mutate(common_name = str_remove(common_name, "\\([^()]+\\)")) |> 
+      mutate(common_name = str_squish(common_name)) |> 
+      select(obs_date, common_name) |> 
+      distinct() |> 
+      arrange(obs_date) |> 
+      group_by(common_name) |> 
+      mutate(common_name_cumsum = dense_rank(obs_date)) |> 
+      mutate(is_lifer = common_name_cumsum == 1) |> 
+      filter(is_lifer == TRUE) |> 
+      ungroup() |> 
+      mutate(lifer_cumsum = row_number())
+    
+  })
+  
+  output$lifer_linechart <- renderPlot({
+    
+    lifer_rows <- nrow(lifer_df())
+    
+    last_lifer <- lifer_df() |> slice(lifer_rows)
+    
+    total_lifers <- last_lifer |> pull(lifer_cumsum)
+    
+    lifer_df() |> 
+      ggplot(aes(obs_date, lifer_cumsum)) +
+      geom_line(lwd = 1.5) +
+      geom_point(data = last_lifer,
+                 size = 4) +
+      geom_label(data = last_lifer,
+                 aes(label = total_lifers),
+                 size = 8,
+                 nudge_x = 120) +
+      labs(title = "Lifer species over time",
+  x = "Observation date",
+y = "Lifer #")
+    
+  })
+  
+  output$lifer_table <- renderReactable({
+    
+    lifer_df() |> 
+      select(obs_date, common_name, lifer_cumsum) |> 
+      arrange(desc(lifer_cumsum)) |> 
+      reactable(columns = list(
+        
+        obs_date = colDef(name = "Observation Date",
+                          filterable = TRUE),
+        common_name = colDef(name = "Species (Common name)",
+                             filterable = TRUE),
+        lifer_cumsum = colDef(name = "Lifer #")
+        
+      ))
     
   })
   
