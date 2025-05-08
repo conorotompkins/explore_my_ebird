@@ -4,6 +4,8 @@ library(tsibble)
 library(janitor)
 library(here)
 library(reactable)
+library(broom)
+library(tune)
 
 options(scipen = 999, digits = 4)
 
@@ -52,7 +54,9 @@ function(input, output, session) {
         obs_date_ym = yearmonth(obs_date),
         obs_date_yw = yearweek(obs_date),
         obs_date_y = year(obs_date),
-        obs_date_m = month(obs_date, label = TRUE, abbr = TRUE),
+        obs_date_m = month(obs_date, label = TRUE, abbr = TRUE) |>
+          as.character() |>
+          factor(levels = month.abb),
         obs_date_w = isoweek(obs_date),
         obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
         obs_date_hour = hour(time)
@@ -301,6 +305,7 @@ function(input, output, session) {
 
   species_detection_df <- reactive({
     user_data() |>
+      filter(all_obs_reported == 1) |>
       select(
         submission_id,
         protocol,
@@ -327,12 +332,7 @@ function(input, output, session) {
       summarize(species_count = n_distinct(common_name)) |>
       ungroup() |>
       mutate(flag_travelling = !is.na(distance_traveled_km)) |>
-      replace_na(list(distance_traveled_km = 0)) |>
-      rename(
-        `Distance traveled` = distance_traveled_km,
-        Duration = duration_min,
-        `Species detected` = species_count
-      )
+      replace_na(list(distance_traveled_km = 0))
   })
 
   #trigger modal dialog if axes are the same
@@ -357,6 +357,11 @@ function(input, output, session) {
 
     species_detection_df() |>
       filter(flag_travelling == TRUE) |>
+      rename(
+        `Distance traveled` = distance_traveled_km,
+        Duration = duration_min,
+        `Species detected` = species_count
+      ) |>
       ggplot(aes(
         !!input$effort_axis_x,
         !!input$effort_axis_y,
@@ -369,5 +374,52 @@ function(input, output, session) {
         y = input$effort_axis_y,
         size = "Species detected"
       )
+  })
+
+  model_df <- reactive({
+    species_detection_df() |>
+      mutate(flag_my_patch = location == "Backyard") |>
+      mutate(cumulative_checklist_no = dense_rank(submission_id)) |>
+      mutate(hour_block = cut_width(obs_date_hour, width = 6)) |>
+      mutate(flag_my_state = state_province == "US-PA") |>
+      mutate(species_count_log10 = log10(species_count))
+  })
+
+  model <- reactive({
+    data_train <- slice_sample(
+      model_df(),
+      prop = .8,
+      by = species_count_log10
+    )
+
+    data_test <- anti_join(
+      model_df(),
+      data_train,
+      by = join_by(submission_id)
+    )
+
+    lm(
+      species_count ~ log(distance_traveled_km + 1) * duration_min + obs_date_m + hour_block + flag_my_patch + cumulative_checklist_no + flag_my_state + log(number_of_observers) + protocol,
+      data = data_train
+    )
+  })
+
+  output$model_df <- renderReactable({
+    model() |>
+      tidy() |>
+      arrange(desc(abs(estimate))) |>
+      reactable()
+  })
+
+  output$model_prediction <- renderPlot({
+    preds <- predict(model(), model_df())
+
+    model_df() |>
+      mutate(.pred = preds, .resid = species_count - .pred) |>
+      ggplot(aes(species_count, .pred)) +
+      geom_abline() +
+      geom_jitter(alpha = .3) +
+      geom_smooth() +
+      coord_obs_pred()
   })
 }
