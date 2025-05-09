@@ -215,7 +215,9 @@ glimpse(species_detection_model_df)
 
 lower_gg <- function(data, mapping, ...) {
   p <- ggplot(data = data, mapping = mapping) +
-    geom_point(alpha = .1, size = .1)
+    #geom_point(alpha = .1, size = .1)
+    geom_bin_2d() +
+    scale_fill_viridis_c()
   p
 }
 
