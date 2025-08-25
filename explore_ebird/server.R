@@ -403,12 +403,16 @@ function(input, output, session) {
       data = data_train
     )
   })
-
-  output$model_df <- renderReactable({
+  
+  model_terms <- reactive({
     model() |>
       tidy() |>
       arrange(desc(abs(estimate))) |>
-      select(variable, estimate, p.value) |> 
+      select(term, estimate, p.value)
+  })
+
+  output$model_terms_graph <- renderReactable({
+    model_terms() |> 
       reactable(columns = list(
         term = colDef("Variable"),
         estimate = colDef("Estimate",
@@ -418,15 +422,23 @@ function(input, output, session) {
       ))
   })
 
-  output$model_prediction <- renderPlot({
+  model_predictions <- reactive({
     preds <- predict(model(), model_df())
-
+    
     model_df() |>
-      mutate(.pred = preds, .resid = species_count - .pred) |>
+      mutate(.pred = preds, .resid = species_count - .pred)
+  })
+  
+  output$model_prediction_graph <- renderPlot({
+    model_predictions() |> 
       ggplot(aes(species_count, .pred)) +
       geom_abline() +
       geom_jitter(alpha = .3) +
       geom_smooth() +
-      coord_obs_pred()
-  })
+      coord_obs_pred() +
+      labs(title = "Actual vs. predicted species count per checklist",
+           x = "Actual species count",
+           y = "Prediction") +
+      theme(plot.title = element_text(size = 14))
+  }, res = 96)
 }
