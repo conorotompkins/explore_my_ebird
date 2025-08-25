@@ -408,7 +408,14 @@ function(input, output, session) {
     model() |>
       tidy() |>
       arrange(desc(abs(estimate))) |>
-      reactable()
+      select(variable, estimate, p.value) |> 
+      reactable(columns = list(
+        term = colDef("Variable"),
+        estimate = colDef("Estimate",
+                          format = colFormat(digits = 1)),
+        p.value = colDef("p value",
+                         format = colFormat(digits = 2))
+      ))
   })
 
   output$model_prediction <- renderPlot({
