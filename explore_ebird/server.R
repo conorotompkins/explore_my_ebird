@@ -403,7 +403,7 @@ function(input, output, session) {
       data = data_train
     )
   })
-  
+
   model_terms <- reactive({
     model() |>
       tidy() |>
@@ -412,49 +412,46 @@ function(input, output, session) {
   })
 
   output$model_terms_table <- renderReactable({
-    model_terms() |> 
-      reactable(columns = list(
-        term = colDef("Variable"),
-        estimate = colDef("Estimate",
-                          format = colFormat(digits = 1)),
-        p.value = colDef("p value",
-                         format = colFormat(digits = 2))
-      ))
+    model_terms() |>
+      reactable(
+        columns = list(
+          term = colDef("Variable"),
+          estimate = colDef("Estimate", format = colFormat(digits = 1)),
+          p.value = colDef("p value", format = colFormat(digits = 2))
+        )
+      )
   })
 
   model_predictions <- reactive({
     preds <- predict(model(), model_df())
-    
+
     model_df() |>
       mutate(.pred = preds, .resid = species_count - .pred)
   })
-  
-  output$model_prediction_graph <- renderPlot({
-    model_predictions() |> 
-      ggplot(aes(species_count, .pred)) +
-      geom_abline() +
-      geom_jitter(alpha = .3) +
-      geom_smooth() +
-      coord_obs_pred() +
-      labs(title = "Actual vs. predicted species count per checklist",
-           x = "Actual species count",
-           y = "Prediction") +
-      theme(plot.title = element_text(size = 14))
-  }, res = 96)
-  
+
+  output$model_prediction_graph <- renderPlot(
+    {
+      model_predictions() |>
+        ggplot(aes(species_count, .pred)) +
+        geom_abline() +
+        geom_jitter(alpha = .3) +
+        geom_smooth() +
+        coord_obs_pred() +
+        labs(title = "Actual vs. predicted species count per checklist", x = "Actual species count", y = "Prediction") +
+        theme(plot.title = element_text(size = 14))
+    },
+    res = 96
+  )
+
   output$model_terms_graph <- renderPlot({
-    model_terms() |> 
-      mutate(term = fct_reorder(term, abs(estimate)),
-             direction = ifelse(estimate > 0, "Positive", "Negative")) |> 
+    model_terms() |>
+      mutate(term = fct_reorder(term, abs(estimate)), direction = ifelse(estimate > 0, "Positive", "Negative")) |>
       ggplot(aes(estimate, term, fill = direction)) +
       geom_vline(xintercept = 0) +
       geom_col(color = "black") +
       scale_fill_viridis_d() +
-      labs(title = "Model terms",
-           x = "Coefficient",
-           y = NULL) +
+      labs(title = "Model terms", x = "Coefficient", y = NULL) +
       guides(fill = "none") +
       theme(panel.grid.minor = element_blank())
-    
   })
 }
