@@ -111,12 +111,13 @@ page_navbar(
       nav_panel(
         "Prediction",
         layout_columns(
-          card(plotOutput("model_prediction_graph"), full_screen = TRUE)
+          card(plotOutput("model_prediction_graph"), full_screen = TRUE),
+          card(plotOutput("model_terms_graph"), full_screen = TRUE)
         )
       ),
       nav_panel(
         "Model terms",
-        card(reactableOutput("model_terms_graph"))
+        card(reactableOutput("model_terms_table"))
         )
     )
   )

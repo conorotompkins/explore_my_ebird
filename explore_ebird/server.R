@@ -411,7 +411,7 @@ function(input, output, session) {
       select(term, estimate, p.value)
   })
 
-  output$model_terms_graph <- renderReactable({
+  output$model_terms_table <- renderReactable({
     model_terms() |> 
       reactable(columns = list(
         term = colDef("Variable"),
@@ -441,4 +441,20 @@ function(input, output, session) {
            y = "Prediction") +
       theme(plot.title = element_text(size = 14))
   }, res = 96)
+  
+  output$model_terms_graph <- renderPlot({
+    model_terms() |> 
+      mutate(term = fct_reorder(term, abs(estimate)),
+             direction = ifelse(estimate > 0, "Positive", "Negative")) |> 
+      ggplot(aes(estimate, term, fill = direction)) +
+      geom_vline(xintercept = 0) +
+      geom_col(color = "black") +
+      scale_fill_viridis_d() +
+      labs(title = "Model terms",
+           x = "Coefficient",
+           y = NULL) +
+      guides(fill = "none") +
+      theme(panel.grid.minor = element_blank())
+    
+  })
 }
