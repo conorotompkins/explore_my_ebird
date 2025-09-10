@@ -39,10 +39,10 @@ page_navbar(
         # Sidebar with a slider input for number of bins
         layout_sidebar(
           sidebar = sidebar(
-            varSelectizeInput(inputId = "checklist_date_selector", label = "Select timespan", data = date_df, selected = "Date", multiple = FALSE)
+            varSelectizeInput(inputId = "checklist_date_selector", label = "Select date type", data = date_df, selected = "Date", multiple = FALSE)
           ),
 
-          plotOutput("obs_linechart")
+          card(plotOutput("obs_linechart"), full_screen = TRUE)
         )
       ),
 

@@ -1,5 +1,6 @@
 library(shiny)
 library(tidyverse)
+library(scales)
 library(tsibble)
 library(janitor)
 library(here)
@@ -143,7 +144,7 @@ function(input, output, session) {
 
     checklist_graph_data() |>
       ggplot(aes(!!input$checklist_date_selector, n_cumsum)) +
-      geom_line() +
+      geom_line(lwd = 1) +
       geom_point(
         data = last_checklist,
         aes(x = !!input$checklist_date_selector, y = total_checklists)
@@ -153,11 +154,13 @@ function(input, output, session) {
         aes(
           x = !!input$checklist_date_selector,
           y = total_checklists,
-          label = total_checklists
+          label = comma(total_checklists)
         ),
-        nudge_x = 75
+        size = 6
       ) +
-      labs(title = "Checklist count over time")
+      scale_y_continuous(expand = expansion(c(.01, .1))) +
+      labs(title = "Checklist count over time", y = "Checklists") +
+      theme(panel.grid.minor = element_blank())
   })
 
   heatmap_date_time_count <- reactive({
