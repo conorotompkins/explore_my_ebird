@@ -62,8 +62,14 @@ page_navbar(
           plotOutput("checklist_heatmap")
         )
       ),
-      nav_panel("Map", card(maplibreOutput("checklist_map"), full_screen = TRUE)),
-      nav_panel("Table", reactableOutput("checklist_table"))
+      nav_panel(
+        "Map",
+        card(maplibreOutput("checklist_map"), full_screen = TRUE)
+      ),
+      nav_panel(
+        "Table",
+        reactableOutput("checklist_table")
+      )
     )
   ),
 
