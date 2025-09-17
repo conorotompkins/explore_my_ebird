@@ -7,6 +7,9 @@ library(here)
 library(reactable)
 library(broom)
 library(tune)
+library(sf)
+library(mapgl)
+library(glue)
 
 options(scipen = 999, digits = 4)
 
@@ -85,9 +88,9 @@ function(input, output, session) {
     user_data() |>
       select(
         submission_id,
+        location,
         common_name,
         duration_min,
-        common_name,
         obs_date,
         obs_date_y,
         obs_date_ym,
@@ -95,7 +98,9 @@ function(input, output, session) {
         obs_date_m,
         obs_date_w,
         obs_date_wday,
-        obs_date_hour
+        obs_date_hour,
+        latitude,
+        longitude
       ) |>
       rename(
         Date = obs_date,
@@ -110,7 +115,7 @@ function(input, output, session) {
       arrange(submission_id) |>
       group_by(
         submission_id,
-        common_name,
+        location,
         Date,
         Year,
         `Year-month`,
@@ -118,9 +123,11 @@ function(input, output, session) {
         Month,
         Week,
         Weekday,
-        Hour
+        Hour,
+        latitude,
+        longitude
       ) |>
-      summarize(species_count = n(), duration = sum(duration_min)) |>
+      summarize(species_count = n_distinct(common_name), duration = sum(duration_min)) |>
       ungroup()
   })
 
@@ -167,9 +174,9 @@ function(input, output, session) {
     checklist_data() |>
       select(
         submission_id,
-        common_name,
         !!input$checklist_date_selector_x,
-        !!input$checklist_date_selector_y
+        !!input$checklist_date_selector_y,
+        species_count
       ) |>
       group_by(
         !!input$checklist_date_selector_x,
@@ -177,7 +184,7 @@ function(input, output, session) {
       ) |>
       summarize(
         checklist_count = n_distinct(submission_id),
-        species_count = n_distinct(common_name)
+        species_count = sum(species_count)
       ) |>
       ungroup() |>
       complete(
@@ -242,6 +249,46 @@ function(input, output, session) {
       geom_tile() +
       scale_fill_viridis_c() +
       labs(title = "Checklist heatmap", fill = input$checklist_metric_selector)
+  })
+
+  output$checklist_table <- renderReactable({
+    checklist_data() |>
+      select(submission_id, Date, location, species_count, duration) |>
+      arrange(desc(Date)) |>
+      reactable()
+  })
+
+  output$checklist_map <- renderMaplibre({
+    checklist_map <- checklist_data() |>
+      summarize(species_count_mean = mean(species_count), species_count_max = max(species_count), checklist_count = n(), .by = c(location, longitude, latitude))
+
+    checklist_map$popup <- glue(
+      "<strong>Location: </strong>{checklist_map$location}<br><strong>Maximum species count: </strong>{checklist_map$species_count_max} <br><strong>Checklists: </strong> {checklist_map$checklist_count}"
+    )
+
+    checklist_map$tooltip <- glue(
+      "{checklist_map$location}"
+    )
+
+    checklist_map <- checklist_map |>
+      st_as_sf(coords = c("longitude", "latitude"), crs = st_crs(4326))
+
+    continuous_scale <- interpolate_palette(
+      data = checklist_map,
+      column = "species_count_max",
+      method = "equal",
+      n = 5,
+      palette = viridisLite::plasma
+    )
+
+    maplibre(bounds = checklist_map) |>
+      add_circle_layer(source = checklist_map, id = "checklist_circles", circle_color = continuous_scale$expression, popup = "popup", tooltip = "tooltip") |>
+      add_legend(
+        "Maximum species detected",
+        values = get_legend_labels(continuous_scale, digits = 0),
+        colors = get_legend_colors(continuous_scale),
+        type = "continuous"
+      )
   })
 
   #lifers
