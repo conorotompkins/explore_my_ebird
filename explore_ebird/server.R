@@ -127,7 +127,10 @@ function(input, output, session) {
         latitude,
         longitude
       ) |>
-      summarize(species_count = n_distinct(common_name), duration = sum(duration_min)) |>
+      summarize(
+        species_count = n_distinct(common_name),
+        duration = sum(duration_min)
+      ) |>
       ungroup()
   })
 
@@ -184,17 +187,25 @@ function(input, output, session) {
       ) |>
       summarize(
         checklist_count = n_distinct(submission_id),
-        species_count = sum(species_count)
+        species_count_mean = mean(species_count),
+        species_count_max = max(species_count)
       ) |>
       ungroup() |>
       complete(
         !!input$checklist_date_selector_x,
         !!input$checklist_date_selector_y
       ) |>
-      replace_na(list(checklist_count = 0, species_count = 0)) |>
+      replace_na(
+        list(
+          checklist_count = 0,
+          species_count_mean = 0,
+          species_count_max = 0
+        )
+      ) |>
       rename(
         `Checklist count` = checklist_count,
-        `Species count` = species_count
+        `Species count (avg)` = species_count_mean,
+        `Species count (max)` = species_count_max
       )
   })
 
@@ -205,7 +216,7 @@ function(input, output, session) {
 
   observeEvent(checklist_data(), {
     var_cols <- heatmap_date_time_count() |>
-      select(`Checklist count`, `Species count`)
+      select(`Checklist count`, contains("Species count"))
 
     updateVarSelectizeInput(
       inputId = "checklist_metric_selector",
