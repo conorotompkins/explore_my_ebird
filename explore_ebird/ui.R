@@ -2,6 +2,7 @@ library(shiny)
 library(bslib)
 library(tidyverse)
 library(reactable)
+library(mapgl)
 
 date_df <- tribble(~Year, ~`Year-month`, ~`Year-week`, ~Date, NA, NA, NA, NA)
 
@@ -60,7 +61,9 @@ page_navbar(
 
           plotOutput("checklist_heatmap")
         )
-      )
+      ),
+      nav_panel("Map", card(maplibreOutput("checklist_map"), full_screen = TRUE)),
+      nav_panel("Table", reactableOutput("checklist_table"))
     )
   ),
 
