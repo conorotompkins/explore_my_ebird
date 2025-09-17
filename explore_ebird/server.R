@@ -240,14 +240,28 @@ function(input, output, session) {
       input$checklist_metric_selector
     )
 
+    x_axis_type <- if (input$checklist_date_selector_x == "Month" || input$checklist_date_selector_x == "Weekday") "discrete" else "continuous"
+
+    y_axis_type <- if (input$checklist_date_selector_y == "Month" || input$checklist_date_selector_y == "Weekday") "discrete" else "continuous"
+
+    scale_x <- function(x) {
+      switch(x_axis_type, discrete = scale_x_discrete(expand = c(0, 0)), continuous = scale_x_continuous(expand = c(0, 0)))
+    }
+
+    scale_y <- function(x) {
+      switch(y_axis_type, discrete = scale_y_discrete(expand = c(0, 0)), continuous = scale_y_continuous(expand = c(0, 0)))
+    }
+
     heatmap_date_time_count() |>
       ggplot(aes(
-        !!input$checklist_date_selector_x,
-        !!input$checklist_date_selector_y,
+        x = !!input$checklist_date_selector_x,
+        y = !!input$checklist_date_selector_y,
         fill = !!input$checklist_metric_selector
       )) +
       geom_tile() +
       scale_fill_viridis_c() +
+      scale_x() +
+      scale_y() +
       labs(title = "Checklist heatmap", fill = input$checklist_metric_selector)
   })
 
