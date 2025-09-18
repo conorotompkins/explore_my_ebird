@@ -23,7 +23,28 @@ page_navbar(
 
     radioButtons(inputId = "complete_checklist_filter", label = "Only include complete checklists", choices = c("Yes", "No"), selected = "Yes"),
 
-    sliderInput(inputId = "year_slider", label = "Choose time period", min = 2019, max = year(Sys.Date()), value = c(2019, year(Sys.Date())), step = 1, sep = "")
+    sliderInput(inputId = "year_slider", label = "Choose time period", min = 2019, max = year(Sys.Date()), value = c(2019, year(Sys.Date())), step = 1, sep = ""),
+
+    selectizeInput(
+      inputId = "user_state_province",
+      label = "Choose your state/province",
+      choices = NULL,
+      selected = NULL
+    ),
+
+    selectizeInput(
+      inputId = "user_county",
+      label = "Choose your county",
+      choices = NULL,
+      selected = NULL
+    ),
+
+    selectizeInput(
+      inputId = "user_patch",
+      label = "Choose your birding patch",
+      choices = NULL,
+      selected = NULL
+    )
   ),
 
   nav_item(
