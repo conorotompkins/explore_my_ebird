@@ -68,6 +68,57 @@ function(input, output, session) {
       arrange(submission_id)
   })
 
+  top_state_province_county <- reactive({
+    user_data_raw() |>
+      count(state_province, county, sort = TRUE)
+  })
+
+  observeEvent(user_data_raw(), {
+    options <- top_state_province_county() |>
+      pull(state_province)
+
+    updateSelectizeInput(
+      inputId = "user_state_province",
+      choices = options,
+      selected = options[1]
+    )
+  })
+
+  observeEvent(user_data_raw(), {
+    options <- top_state_province_county() |>
+      pull(county)
+
+    updateSelectizeInput(
+      inputId = "user_county",
+      choices = options,
+      selected = options[1]
+    )
+  })
+
+  observeEvent(input$user_state_province, {
+    options <- top_state_province_county() |>
+      filter(state_province == input$user_state_province) |>
+      pull(county)
+
+    updateSelectizeInput(
+      inputId = "user_county",
+      choices = options,
+      selected = options[1]
+    )
+  })
+
+  observeEvent(user_data_raw(), {
+    options <- user_data_raw() |>
+      count(location, sort = TRUE) |>
+      pull(location)
+
+    updateSelectizeInput(
+      inputId = "user_patch",
+      choices = options,
+      selected = options[1]
+    )
+  })
+
   user_data <- reactive({
     #apply global filters
 
@@ -453,10 +504,10 @@ function(input, output, session) {
 
   model_df <- reactive({
     species_detection_df() |>
-      mutate(flag_my_patch = location == "Backyard") |>
+      mutate(flag_my_patch = location == input$user_patch) |>
       mutate(cumulative_checklist_no = dense_rank(submission_id)) |>
       mutate(hour_block = cut_width(obs_date_hour, width = 6)) |>
-      mutate(flag_my_state = state_province == "US-PA") |>
+      mutate(flag_my_state = state_province == input$user_state_province) |>
       mutate(species_count_log10 = log10(species_count))
   })
 
