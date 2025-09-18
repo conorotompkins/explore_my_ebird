@@ -506,7 +506,27 @@ function(input, output, session) {
     species_detection_df() |>
       mutate(flag_my_patch = location == input$user_patch) |>
       mutate(cumulative_checklist_no = dense_rank(submission_id)) |>
-      mutate(hour_block = cut_width(obs_date_hour, width = 6)) |>
+      mutate(
+        hour_block = case_when(
+          between(obs_date_hour, 0, 3) ~ "12am-3am",
+          between(obs_date_hour, 4, 7) ~ "4am-7am",
+          between(obs_date_hour, 8, 11) ~ "8am-11am",
+          between(obs_date_hour, 12, 15) ~ "12pm-3pm",
+          between(obs_date_hour, 16, 19) ~ "4pm-7pm",
+          between(obs_date_hour, 20, 23) ~ "8pm-11pm"
+        ),
+        hour_block = factor(
+          hour_block,
+          levels = c(
+            "12am-3am",
+            "4am-7am",
+            "8am-11am",
+            "12pm-3pm",
+            "4pm-7pm",
+            "8pm-11pm"
+          )
+        )
+      ) |>
       mutate(flag_my_state = state_province == input$user_state_province) |>
       mutate(species_count_log10 = log10(species_count))
   })
