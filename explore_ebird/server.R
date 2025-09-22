@@ -15,7 +15,9 @@ options(scipen = 999, digits = 4)
 
 theme_set(theme_bw(base_size = 18))
 
-species_exclude_df <- tibble(common_name = c("Muscovy Duck"))
+species_exclude_df <- tibble(
+  common_name = c("Muscovy Duck (Domestic type)")
+)
 
 # Define server logic required to draw a histogram
 function(input, output, session) {
@@ -55,6 +57,7 @@ function(input, output, session) {
       clean_names() |>
       rename(obs_date = date, species_count = count) |>
       mutate(
+        obs_date_time = str_c(obs_date, time) |> ymd_hms(),
         obs_date_ym = yearmonth(obs_date),
         obs_date_yw = yearweek(obs_date),
         obs_date_y = year(obs_date),
@@ -370,40 +373,47 @@ function(input, output, session) {
   #lifers
 
   lifer_df <- reactive({
-    user_data() |>
-      anti_join(species_exclude_df, by = join_by(common_name)) |> #not working
+    x <- user_data() |>
       filter(!str_detect(common_name, "sp.")) |>
       filter(!str_detect(common_name, "\\/")) |>
+      anti_join(species_exclude_df) |>
       mutate(common_name = str_remove(common_name, "\\([^()]+\\)")) |>
       mutate(common_name = str_squish(common_name)) |>
-      select(obs_date, common_name) |>
-      distinct() |>
-      arrange(obs_date) |>
+      select(submission_id, obs_date_time, common_name) |>
+      arrange(common_name, obs_date_time) |>
       group_by(common_name) |>
-      mutate(common_name_cumsum = dense_rank(obs_date)) |>
-      mutate(is_lifer = common_name_cumsum == 1) |>
-      filter(is_lifer == TRUE) |>
+      slice_head(n = 1) |>
       ungroup() |>
-      mutate(lifer_cumsum = row_number())
+      arrange(obs_date_time) |>
+      mutate(lifer_cumsum = row_number()) |>
+      arrange(desc(lifer_cumsum)) |>
+      mutate(obs_date = as_date(obs_date_time)) |>
+      select(-obs_date_time)
+
+    x |>
+      left_join(user_data() |> distinct(submission_id, state_province, county, location)) |>
+      select(lifer_cumsum, common_name, obs_date, state_province, county, location, submission_id)
   })
 
   output$lifer_linechart <- renderPlot({
-    lifer_rows <- nrow(lifer_df())
-
-    last_lifer <- lifer_df() |> slice(lifer_rows)
+    last_lifer <- lifer_df() |>
+      slice(1) |>
+      mutate(description = glue("Lifer #{lifer_cumsum}: {common_name}"))
 
     total_lifers <- last_lifer |> pull(lifer_cumsum)
 
+    print(lifer_df())
+
     lifer_df() |>
       ggplot(aes(obs_date, lifer_cumsum)) +
-      geom_line(lwd = 1.5) +
-      geom_point(data = last_lifer, size = 4) +
+      geom_path() +
       geom_label(
         data = last_lifer,
-        aes(label = total_lifers),
-        size = 8,
+        aes(label = description),
+        size = 4,
         nudge_x = 120
       ) +
+      scale_x_date(expand = expansion(mult = c(0, .1))) +
       labs(
         title = "Lifer species over time",
         x = "Observation date",
@@ -413,16 +423,24 @@ function(input, output, session) {
 
   output$lifer_table <- renderReactable({
     lifer_df() |>
-      select(obs_date, common_name, lifer_cumsum) |>
-      arrange(desc(lifer_cumsum)) |>
+      select(
+        lifer_cumsum,
+        common_name,
+        obs_date,
+        state_province,
+        county,
+        location,
+        submission_id
+      ) |>
       reactable(
         columns = list(
+          lifer_cumsum = colDef(name = "Lifer #"),
           obs_date = colDef(name = "Observation Date", filterable = TRUE),
-          common_name = colDef(
-            name = "Species (Common name)",
-            filterable = TRUE
-          ),
-          lifer_cumsum = colDef(name = "Lifer #")
+          common_name = colDef(name = "Species (Common name)", filterable = TRUE),
+          state_province = colDef(name = "State/Province", filterable = TRUE),
+          county = colDef(name = "County", filterable = TRUE),
+          location = colDef(name = "Location", filterable = TRUE),
+          submission_id = colDef(name = "Checklist")
         )
       )
   })
