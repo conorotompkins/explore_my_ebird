@@ -10,7 +10,9 @@ options(scipen = 999, digits = 4)
 
 theme_set(theme_bw())
 
-my_data_raw <- here("inputs/MyEBirdData.csv") |>
+species_exclude_df <- tibble(common_name = c("Muscovy Duck (Domestic type)"))
+
+my_data_raw <- here("inputs/MyEBirdData 3.csv") |>
   read_csv() |>
   clean_names()
 
@@ -28,7 +30,8 @@ my_data <- my_data_raw |>
       factor(levels = month.abb),
     obs_date_w = isoweek(obs_date),
     obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
-    obs_date_hour = hour(time)
+    obs_date_hour = hour(time),
+    obs_date_time = str_c(obs_date, time) |> ymd_hms()
   ) |>
   arrange(submission_id)
 
@@ -77,40 +80,42 @@ obs_data |>
 
 #lifers
 lifer_df <- my_data |>
-  select(obs_date, common_name, state_province) |>
-  distinct() |>
-  arrange(state_province, obs_date) |>
-  group_by(common_name, state_province) |>
-  mutate(common_name_cumsum = dense_rank(obs_date)) |>
-  mutate(is_lifer = common_name_cumsum == 1) |>
-  filter(is_lifer == TRUE) |>
-  group_by(state_province) |>
-  mutate(lifer_cumsum = row_number()) |>
+  filter(!str_detect(common_name, "sp.")) |>
+  filter(!str_detect(common_name, "\\/")) |>
+  anti_join(species_exclude_df) |>
+  mutate(common_name = str_remove(common_name, "\\([^()]+\\)")) |>
+  mutate(common_name = str_squish(common_name)) |>
+  select(submission_id, obs_date_time, common_name) |>
+  arrange(common_name, obs_date_time) |>
+  group_by(common_name) |>
+  slice_head(n = 1) |>
   ungroup() |>
-  mutate(state_province = fct_infreq(state_province))
+  arrange(obs_date_time) |>
+  mutate(lifer_cumsum = row_number()) |>
+  arrange(desc(lifer_cumsum)) |>
+  mutate(obs_date = as_date(obs_date_time)) |>
+  select(-obs_date_time)
 
-lifer_df
+lifer_df <- lifer_df |>
+  left_join(my_data |> distinct(submission_id, state_province, county, location)) |>
+  select(lifer_cumsum, common_name, obs_date, state_province, county, location)
+
+lifer_df |>
+  count(common_name) |>
+  filter(n > 1)
+
+lifer_df |>
+  filter(lifer_cumsum <= lag(lifer_cumsum, 1))
+
+lifer_df |>
+  filter(obs_date >= lag(obs_date, 1))
 
 lifer_df |>
   ggplot(aes(
     obs_date,
-    lifer_cumsum,
-    color = state_province,
-    group = state_province
+    lifer_cumsum
   )) +
-  geom_line()
-
-
-lifer_df |>
-  select(obs_date, common_name) |>
-  distinct() |>
-  arrange(common_name, obs_date) |>
-  group_by(common_name) |>
-  mutate(common_name_cumsum = dense_rank(obs_date)) |>
-  mutate(is_lifer = common_name_cumsum == 1) |>
-  filter(is_lifer == TRUE) |>
-  ungroup() |>
-  mutate(lifer_cumsum = row_number())
+  geom_path()
 
 #species detection
 species_detection <- my_data |>
