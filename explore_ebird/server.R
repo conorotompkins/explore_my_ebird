@@ -25,7 +25,7 @@ function(input, output, session) {
   observeEvent(input$trigger_upload_modal, {
     showModal(
       modalDialog(
-        title = "Upload eBird data!",
+        title = tags$a(href = "https://ebird.org/downloadMyData", "Export your data from eBird", target = "_blank"),
 
         renderUI(
           fileInput(
