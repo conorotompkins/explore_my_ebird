@@ -48,7 +48,7 @@ page_navbar(
   ),
 
   nav_item(
-    actionButton(inputId = "trigger_upload_modal", label = "Upload eBird CSV")
+    actionButton(inputId = "trigger_upload_modal", label = "Upload your eBird data")
   ),
 
   nav_panel(
