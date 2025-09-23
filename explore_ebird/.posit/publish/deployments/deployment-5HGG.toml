@@ -11,8 +11,8 @@ id = '019973eb-a574-811c-78e6-00920a85ac31'
 dashboard_url = 'https://connect.posit.cloud/conorotompkins/content/019973eb-a574-811c-78e6-00920a85ac31'
 direct_url = 'https://019973eb-a574-811c-78e6-00920a85ac31.share.connect.posit.cloud'
 logs_url = 'https://connect.posit.cloud/conorotompkins/content/019973eb-a574-811c-78e6-00920a85ac31/history'
-deployed_at = '2025-09-22T20:45:02-04:00'
-bundle_id = '01997407-f0ca-aba0-f060-0b27af100d23'
+deployed_at = '2025-09-23T09:05:04-04:00'
+bundle_id = '019976ad-7564-c4b7-a552-4372107d0c30'
 files = [
   '.posit/publish/Explore your eBird-M92B.toml',
   '.posit/publish/deployments/deployment-5HGG.toml',

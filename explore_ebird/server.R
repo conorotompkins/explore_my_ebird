@@ -31,7 +31,7 @@ function(input, output, session) {
           fileInput(
             inputId = "upload",
             label = "Upload eBird CSV",
-            accept = ".csv"
+            accept = c(".csv", ".zip")
           )
         ),
 
