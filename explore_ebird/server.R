@@ -142,6 +142,8 @@ function(input, output, session) {
     user_data() |>
       select(
         submission_id,
+        state_province,
+        county,
         location,
         common_name,
         duration_min,
@@ -169,6 +171,8 @@ function(input, output, session) {
       arrange(submission_id) |>
       group_by(
         submission_id,
+        state_province,
+        county,
         location,
         Date,
         Year,
@@ -183,7 +187,7 @@ function(input, output, session) {
       ) |>
       summarize(
         species_count = n_distinct(common_name),
-        duration = sum(duration_min)
+        duration = unique(duration_min)
       ) |>
       ungroup()
   })
@@ -332,9 +336,36 @@ function(input, output, session) {
 
   output$checklist_table <- renderReactable({
     checklist_data() |>
-      select(submission_id, Date, location, species_count, duration) |>
+      select(
+        submission_id,
+        Date,
+        state_province,
+        county,
+        location,
+        species_count,
+        duration
+      ) |>
       arrange(desc(Date)) |>
-      reactable()
+      reactable(
+        columns = list(
+          submission_id = colDef("Checklist"),
+          Date = colDef("Date"),
+          state_province = colDef(
+            "State/Province",
+            filterable = TRUE
+          ),
+          county = colDef(
+            "County",
+            filterable = TRUE
+          ),
+          location = colDef(
+            "Location",
+            filterable = TRUE
+          ),
+          species_count = colDef("Species count"),
+          duration = colDef("Duration (minutes)")
+        )
+      )
   })
 
   output$checklist_map <- renderMaplibre({
