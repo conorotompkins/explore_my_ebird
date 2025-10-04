@@ -122,6 +122,25 @@ function(input, output, session) {
     )
   })
 
+  #update year slider
+  observeEvent(user_data_raw(), {
+    options <- user_data_raw() |>
+      distinct(obs_date_y) |>
+      pull(obs_date_y)
+
+    y_min <- min(options)
+    y_max <- max(options)
+
+    init <- c(max(c(y_min, y_max - 5)), y_max)
+
+    updateSliderInput(
+      inputId = "year_slider",
+      min = min(options),
+      max = max(options),
+      value = init
+    )
+  })
+
   user_data <- reactive({
     #apply global filters
 
