@@ -12,9 +12,16 @@ theme_set(theme_bw())
 
 species_exclude_df <- tibble(common_name = c("Muscovy Duck (Domestic type)"))
 
-my_data_raw <- here("inputs/MyEBirdData 3.csv") |>
+my_data_raw <- here("inputs/MyEBirdData 4.csv") |>
   read_csv() |>
   clean_names()
+
+#there are weird problems with delimiters in the data
+problems(my_data_raw)
+
+here("inputs/MyEBirdData 4.csv") |>
+  read_lines(skip = 2, n_max = 1) |>
+  cat()
 
 glimpse(my_data_raw)
 
