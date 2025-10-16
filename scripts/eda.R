@@ -10,9 +10,11 @@ options(scipen = 999, digits = 4)
 
 theme_set(theme_bw())
 
+file_path <- "inputs/MyEBirdData 4.csv"
+
 species_exclude_df <- tibble(common_name = c("Muscovy Duck (Domestic type)"))
 
-my_data_raw <- here("inputs/MyEBirdData 4.csv") |>
+my_data_raw <- here(file_path) |>
   read_csv() |>
   clean_names()
 
@@ -22,6 +24,41 @@ problems(my_data_raw)
 here("inputs/MyEBirdData 4.csv") |>
   read_lines(skip = 2, n_max = 1) |>
   cat()
+
+read.csv(file_path) |>
+  as_tibble() |>
+  clean_names() |>
+  rename(obs_date = date, species_count = count) |>
+  mutate(obs_date_time = str_c(obs_date, time, sep = " ") |> ymd_hm()) |>
+  select(obs_date_time)
+
+parse_date_time("2024-10-07 12:09 PM", orders = "%Y-%m-%d %H:%M %p")
+
+file_base_r <- read.csv(file_path) |>
+  as_tibble() |>
+  clean_names() |>
+  rename(obs_date = date, species_count = count) |>
+  mutate(
+    obs_date = ymd(obs_date),
+    obs_date_time = str_c(obs_date, time) |> ymd_hm(),
+    obs_date_ym = yearmonth(obs_date),
+    obs_date_yw = yearweek(obs_date),
+    obs_date_y = year(obs_date),
+    obs_date_m = month(obs_date, label = TRUE, abbr = TRUE) |>
+      as.character() |>
+      factor(levels = month.abb),
+    obs_date_w = isoweek(obs_date),
+    obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
+    time = hm(time),
+    obs_date_hour = hour(time)
+  ) |>
+  arrange(submission_id)
+
+glimpse(file_base_r)
+
+nrow(my_data_raw) == nrow(file_base_r)
+
+ncol(my_data_raw) == ncol(file_base_r)
 
 glimpse(my_data_raw)
 

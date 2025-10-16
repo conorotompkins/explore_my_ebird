@@ -53,11 +53,13 @@ function(input, output, session) {
     ext <- tools::file_ext(input$upload$name)
 
     #read in and clean up
-    read_csv(input$upload$datapath) |>
+    read.csv(input$upload$datapath) |>
+      as_tibble() |>
       clean_names() |>
       rename(obs_date = date, species_count = count) |>
       mutate(
-        obs_date_time = str_c(obs_date, time) |> ymd_hms(),
+        obs_date = ymd(obs_date),
+        obs_date_time = str_c(obs_date, time) |> ymd_hm(),
         obs_date_ym = yearmonth(obs_date),
         obs_date_yw = yearweek(obs_date),
         obs_date_y = year(obs_date),
@@ -66,7 +68,7 @@ function(input, output, session) {
           factor(levels = month.abb),
         obs_date_w = isoweek(obs_date),
         obs_date_wday = wday(obs_date, label = TRUE, abbr = TRUE),
-        obs_date_hour = hour(time)
+        obs_date_hour = hour(obs_date_time)
       ) |>
       arrange(submission_id)
   })
