@@ -369,7 +369,10 @@ function(input, output, session) {
       arrange(desc(Date)) |>
       reactable(
         columns = list(
-          submission_id = colDef("Checklist"),
+          submission_id = colDef(name = "Checklist", cell = function(value) {
+            url <- paste0("https://ebird.org/checklist/", value)
+            tags$a(href = url, target = "_blank", value)
+          }),
           Date = colDef("Date"),
           state_province = colDef(
             "State/Province",
@@ -492,7 +495,10 @@ function(input, output, session) {
           state_province = colDef(name = "State/Province", filterable = TRUE),
           county = colDef(name = "County", filterable = TRUE),
           location = colDef(name = "Location", filterable = TRUE),
-          submission_id = colDef(name = "Checklist")
+          submission_id = colDef(name = "Checklist", cell = function(value) {
+            url <- paste0("https://ebird.org/checklist/", value)
+            tags$a(href = url, target = "_blank", value)
+          })
         )
       )
   })

@@ -650,7 +650,7 @@
     },
     "forcats": {
       "Package": "forcats",
-      "Version": "1.0.0",
+      "Version": "1.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -662,7 +662,7 @@
         "rlang",
         "tibble"
       ],
-      "Hash": "1a0a9a3d5083d0d573c4214576f1e690"
+      "Hash": "f884a14605c6a9eb01db676eee793ba7"
     },
     "foreign": {
       "Package": "foreign",
@@ -972,17 +972,18 @@
     },
     "hms": {
       "Package": "hms",
-      "Version": "1.1.3",
+      "Version": "1.1.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
+        "cli",
         "lifecycle",
         "methods",
         "pkgconfig",
         "rlang",
         "vctrs"
       ],
-      "Hash": "b59377caa7ed00fa41808342002138f9"
+      "Hash": "33392c350b78a33a53ca8e3e880a7e83"
     },
     "htmltools": {
       "Package": "htmltools",
@@ -1397,13 +1398,13 @@
     },
     "openssl": {
       "Package": "openssl",
-      "Version": "2.3.3",
+      "Version": "2.3.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "askpass"
       ],
-      "Hash": "05ce1ed077e8c97fbb3ec1cb078f1159"
+      "Hash": "d5811dade9cd3a34a9038a45f1a59bae"
     },
     "parallelly": {
       "Package": "parallelly",
@@ -1533,7 +1534,7 @@
     },
     "progressr": {
       "Package": "progressr",
-      "Version": "0.16.0",
+      "Version": "0.17.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1541,7 +1542,7 @@
         "digest",
         "utils"
       ],
-      "Hash": "a1c4def81b4a098b2e288558f719cbad"
+      "Hash": "e631739215def11dadebd1f68e6ca585"
     },
     "promises": {
       "Package": "promises",
@@ -1783,7 +1784,7 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "2.29",
+      "Version": "2.30",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1802,7 +1803,7 @@
         "xfun",
         "yaml"
       ],
-      "Hash": "df99277f63d01c34e95e3d2f06a79736"
+      "Hash": "efe19db0fde0fff13cea7eec6f695021"
     },
     "rpart": {
       "Package": "rpart",
@@ -2147,7 +2148,7 @@
     },
     "systemfonts": {
       "Package": "systemfonts",
-      "Version": "1.2.3",
+      "Version": "1.3.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2160,7 +2161,7 @@
         "tools",
         "utils"
       ],
-      "Hash": "fe31683d2c6fd9a5724bcdf8ed44ded9"
+      "Hash": "4fae513a3bb1a155943d1e9d1ae467ec"
     },
     "tailor": {
       "Package": "tailor",
@@ -2183,7 +2184,7 @@
     },
     "terra": {
       "Package": "terra",
-      "Version": "1.8-60",
+      "Version": "1.8-70",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2191,11 +2192,11 @@
         "Rcpp",
         "methods"
       ],
-      "Hash": "f5099153b1731d554e8b2fd779032c36"
+      "Hash": "86833f7c348b690355cfd73984dbfa93"
     },
     "textshaping": {
       "Package": "textshaping",
-      "Version": "1.0.3",
+      "Version": "1.0.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2207,7 +2208,7 @@
         "systemfonts",
         "utils"
       ],
-      "Hash": "2fd3d0b32fc922bac1121f5409b96910"
+      "Hash": "477d70e23914730aa7f5c5fd351f4721"
     },
     "tibble": {
       "Package": "tibble",
@@ -2309,7 +2310,7 @@
     },
     "timeDate": {
       "Package": "timeDate",
-      "Version": "4041.110",
+      "Version": "4051.111",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2319,7 +2320,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "c5e48e8ac24d4472ddb122bcdeb011ad"
+      "Hash": "ed2400152931480d09eeb28d678260d9"
     },
     "timechange": {
       "Package": "timechange",
@@ -2365,7 +2366,7 @@
     },
     "tune": {
       "Package": "tune",
-      "Version": "2.0.0",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2393,7 +2394,7 @@
         "workflows",
         "yardstick"
       ],
-      "Hash": "4ad4b5fb10ebb647726026f64b3d4035"
+      "Hash": "187160985e7ff6ea31690d0e01b103a9"
     },
     "tzdb": {
       "Package": "tzdb",
@@ -2408,14 +2409,14 @@
     },
     "units": {
       "Package": "units",
-      "Version": "0.8-7",
+      "Version": "1.0-0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp"
       ],
-      "Hash": "5d0b024902d5da97a2b64f002e92a869"
+      "Hash": "6edc7dfe2c394c287003ab6c88db64ba"
     },
     "utf8": {
       "Package": "utf8",
