@@ -369,7 +369,10 @@ function(input, output, session) {
       arrange(desc(Date)) |>
       reactable(
         columns = list(
-          submission_id = colDef("Checklist"),
+          submission_id = colDef(name = "Checklist", cell = function(value) {
+            url <- paste0("https://ebird.org/checklist/", value)
+            tags$a(href = url, target = "_blank", value)
+          }),
           Date = colDef("Date"),
           state_province = colDef(
             "State/Province",
