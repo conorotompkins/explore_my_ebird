@@ -495,7 +495,10 @@ function(input, output, session) {
           state_province = colDef(name = "State/Province", filterable = TRUE),
           county = colDef(name = "County", filterable = TRUE),
           location = colDef(name = "Location", filterable = TRUE),
-          submission_id = colDef(name = "Checklist")
+          submission_id = colDef(name = "Checklist", cell = function(value) {
+            url <- paste0("https://ebird.org/checklist/", value)
+            tags$a(href = url, target = "_blank", value)
+          })
         )
       )
   })
